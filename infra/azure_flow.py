@@ -20,6 +20,11 @@ RG_P1 = 'p1-rg-test'
 
 ACR_NAME = 'p1acrtrio'
 ACR_SKU = 'Basic'
+
+LOG_ANALYTICS_WORKSPACE_NAME = "p1-log-analytics"
+LOG_ANALYTICS_SKU = "PerGB2018"
+LOG_ANALYTICS_RETENTION_DAYS = "30"
+
 MANAGED_IDENTITY_ACR_CONFIG = '{"acrUseManagedIdentityCreds": true}'
 
 PROJECT_ROOT = os.path.dirname(
@@ -581,8 +586,41 @@ def create_private_endpoint_for_web_app(
     run_command(disable_public_access_cmd)
 
 
-def create_log_analytics_workspace():
-    pass
+def create_log_analytics_workspace(
+    rg_name,
+    workspace_name,
+    location,
+):
+    workspace_show_cmd = [
+        "az", "monitor", "log-analytics", "workspace", "show",
+        "--resource-group", rg_name,
+        "--workspace-name", workspace_name,
+        "--output", "none",
+    ]
+
+    try:
+        run_command(
+            workspace_show_cmd,
+            display_command=False,
+            print_result=False,
+        )
+        print(f"Log Analytics Workspace '{workspace_name}' already exists.")
+        return
+
+    except:
+        pass
+
+    workspace_create_cmd = [
+        "az", "monitor", "log-analytics", "workspace", "create",
+        "--resource-group", rg_name,
+        "--workspace-name", workspace_name,
+        "--location", location,
+        "--sku", LOG_ANALYTICS_SKU,
+        "--retention-time", LOG_ANALYTICS_RETENTION_DAYS,
+        "--output", "table",
+    ]
+
+    run_command(workspace_create_cmd)
 
 def create_azure_managed_grafana():
     # Create grafana workspace
@@ -651,6 +689,11 @@ def start_deployment():
     )
 
     # 3. 
+    create_log_analytics_workspace(
+        rg_name=rg_name,
+        workspace_name=LOG_ANALYTICS_WORKSPACE_NAME,
+        location=location,
+    )
     # create_resource_group()
     # create_log_analytics_workspace()
     # create_application_insights(), 
