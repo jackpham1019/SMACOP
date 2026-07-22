@@ -1,4 +1,5 @@
 import os
+import httpx
 import time
 import logging
 import psycopg2
@@ -162,17 +163,15 @@ async def login(payload: AuthPayload):
     try:
         authenticate_user(username=payload.username,password=payload.password)
         jwt_token = create_access_token(username=payload.username)
-        return {
-            "access_token" : jwt_token,
-            "token_type" : "bearer"
-        }
+        return TokenResponse(access_token=jwt_token, token_type="bearer")
     except InvalidCredentialsError as e:
-        return HTTPException(status_code=401, detail=str(e))
+        raise HTTPException(status_code=401, detail=str(e))
 
-# protected by jwt
 @app.get("/login-check")
-def login_check(username: str = Depends(decode_and_verify_token)):
-    return {"message": f"Hello {username}, you're authenticated"}
+async def login_check(username: str = Depends(decode_and_verify_token)):
+    async with httpx.AsyncClient() as client:
+        response = await client.get("https://p1-web-app.azurewebsites.net/health")
+    return {"status_code": response.status_code, "body": response.text} 
         
 
 @app.get("/health")
@@ -206,3 +205,5 @@ def db_check():
     finally:
         if conn:
             conn.close()
+
+
