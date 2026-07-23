@@ -1,4 +1,3 @@
-
 #####################
 # This automation script still have idempotence issues, ensure resources from previous runs are properly removed before running to prevent unintended errors
 
@@ -6,7 +5,10 @@
 ######################
 import os
 import ipaddress
+import json
+import tempfile
 
+from pathlib import Path
 from util import run_command
 
 APP_SERVICE_SKU = 'B1'
@@ -30,6 +32,11 @@ MANAGED_IDENTITY_ACR_CONFIG = '{"acrUseManagedIdentityCreds": true}'
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))
 )
+VM_ENV_PATH = os.path.join(
+    PROJECT_ROOT, 
+    "app",
+    ".env"
+)
 SSH_KEY_PATH = os.path.expanduser("~/code/keys/project-1-vm-key.pem")
 BOOTSTRAP_SCRIPT = os.path.join(
     PROJECT_ROOT, 
@@ -41,7 +48,6 @@ WEB_APP_DIR = os.path.join(
     "azure",
     "web-app"
 )
-
 
 def authenticate():
     # Authenticate the python automation script with azure using service principal
@@ -109,10 +115,15 @@ def create_vm_if_not_exists(
     public_ip_name = f"{vm_name}-pip"
     os_disk_name = f"{vm_name}-osdisk"
 
-    check_vm_cmd = ["az", "vm", "list", "-g", rg_name, "--query", f"[?name=='{vm_name}'].name", "-o", "tsv"]
-    vm_check_output = run_command(check_vm_cmd).strip()
+    check_vm_cmd = [
+        "az", "vm", "list", 
+        "-g", rg_name,
+        "--query", f"[?name=='{vm_name}'].id",
+        "-o", "tsv",
+    ]
+    vm_id = run_command(check_vm_cmd).strip()
 
-    if not vm_check_output:
+    if not vm_id:
         print(f"VM {vm_name} not found. Provisioning now...")
         create_vm_cmd = [
             "az", "vm", "create",
@@ -134,9 +145,10 @@ def create_vm_if_not_exists(
             "--os-disk-name", os_disk_name,
 
             "--boot-diagnostics-storage", "",
-            "--output", "table"
+            "--query", "id",
+            "-o", "tsv"
         ]
-        run_command(create_vm_cmd)
+        vm_id = run_command(create_vm_cmd).strip()
 
     auto_shutdown_cmd = [
         "az", "vm", "auto-shutdown", 
@@ -160,6 +172,8 @@ def create_vm_if_not_exists(
         "--output", "table"
     ]
     run_command(create_nsg_cmd)
+
+    return vm_id
 
 def deploy_app_to_vm_via_bootstrap_script(
         rg_name,
@@ -188,7 +202,6 @@ def deploy_app_to_vm_via_bootstrap_script(
         f"azureuser@{vm_public_ip}:~/"
     ]
     run_command(scp_cmd)
-    print()
 
     # SSH and run the remote bootstrap script to set up Docker, Docker Compose, and deploy the FastAPI application
     print("=== SSH into VM and Execute Bootstrap Script ===")
@@ -296,6 +309,7 @@ def create_app_service_plan_if_not_exists(
 
 def create_empty_web_app_with_managed_identity(
         rg_name, 
+        rg_shared_name,
         location, 
         app_service_plan_name,
         web_app_name, 
@@ -303,7 +317,7 @@ def create_empty_web_app_with_managed_identity(
         sku=APP_SERVICE_SKU
     ):
     
-    create_app_service_plan_if_not_exists(app_service_plan_name, RG_SHARED, location, sku)
+    create_app_service_plan_if_not_exists(app_service_plan_name, rg_shared_name, location, sku)
 
     web_app_create_cmd = [
         "az", "webapp", "create",
@@ -333,6 +347,7 @@ def create_empty_web_app_with_managed_identity(
 
 def deploy_container_to_azure_web_app(
         rg_name, 
+        rg_shared_name,
         acr_name, 
         location, 
         app_service_plan_name, 
@@ -349,10 +364,10 @@ def deploy_container_to_azure_web_app(
         # Create Azure Web App pointing to the image on the ACR 
 
 
-    create_acr_if_not_exists(RG_SHARED, acr_name, acr_sku)
+    create_acr_if_not_exists(rg_shared_name, acr_name, acr_sku)
     container_image = build_locally_and_push_image_to_acr(acr_name, image_name, image_tag)
 
-    create_empty_web_app_with_managed_identity(rg_name, location, app_service_plan_name, web_app_name, container_image, appservice_sku)
+    create_empty_web_app_with_managed_identity(rg_name, rg_shared_name, location, app_service_plan_name, web_app_name, container_image, appservice_sku)
 
     webapp_identity_show_cmd = [
         "az", "webapp", "identity", "show",
@@ -402,6 +417,16 @@ def deploy_container_to_azure_web_app(
         "--name", web_app_name
     ]
     run_command(webapp_restart_cmd)
+
+    get_web_app_endpoint_cmd = [
+        "az", "webapp", "show",
+        "--name", web_app_name, 
+        "--resource-group", rg_name,
+        "--query", "defaultHostName",
+        "--output", "tsv"
+    ]
+
+    return run_command(get_web_app_endpoint_cmd).strip()
 
     # ==================================
     # Deploy as triggered task (EXTRA)
@@ -589,24 +614,6 @@ def create_log_analytics_workspace(
     workspace_name,
     location,
 ):
-    workspace_show_cmd = [
-        "az", "monitor", "log-analytics", "workspace", "show",
-        "--resource-group", rg_name,
-        "--workspace-name", workspace_name,
-        "--output", "none",
-    ]
-
-    try:
-        run_command(
-            workspace_show_cmd,
-            display_command=False,
-            print_result=False,
-        )
-        print(f"Log Analytics Workspace '{workspace_name}' already exists.")
-        return
-
-    except:
-        pass
 
     workspace_create_cmd = [
         "az", "monitor", "log-analytics", "workspace", "create",
@@ -615,60 +622,177 @@ def create_log_analytics_workspace(
         "--location", location,
         "--sku", LOG_ANALYTICS_SKU,
         "--retention-time", LOG_ANALYTICS_RETENTION_DAYS,
-        "--output", "table",
+        "--query", "id",
+        "-o", "tsv",
+    ]
+    workspace_id = run_command(workspace_create_cmd).strip()
+    return workspace_id
+
+def create_app_insights(
+    app_insights_name,
+    location,
+    rg_name,
+    law_name
+):
+
+    app_insights_cmd = [
+        "az", "monitor", "app-insights", "component", "create",
+        "--app", app_insights_name,
+        "--location", location,
+        "--kind", "web",
+        "--resource-group", rg_name,
+        "--workspace", law_name,
+    ]
+    run_command(app_insights_cmd)
+
+    get_conn_string_cmd = [
+        "az", "monitor", "app-insights", "component", "show",
+        "--app", app_insights_name,
+        "--resource-group", rg_name,
+        "--query", "connectionString",
+        "-o", "tsv"
     ]
 
-    run_command(workspace_create_cmd)
+    return run_command(get_conn_string_cmd).strip()
 
-def create_azure_managed_grafana():
-    # Create grafana workspace
-    # Grant 
+def create_dcr(location, law_id, dcr_name, rg_name):
+    dcr_definition = {
+        "location": location,
+        "kind": "Linux",
+        "properties": {
+            "dataSources": {
+                "syslog": [
+                    {
+                        "name": "syslog",
+                        "streams": ["Microsoft-Syslog"],
+                        "facilityNames": ["auth", "authpriv"],
+                        "logLevels": ["Info"],
+                    }
+                ]
+            },
+            "destinations": {
+                "logAnalytics": [
+                    {
+                        "name": "law",
+                        "workspaceResourceId": law_id,
+                    }
+                ]
+            },
+            "dataFlows": [
+                {
+                    "streams": ["Microsoft-Syslog"],
+                    "destinations": ["law"],
+                }
+            ],
+        },
+    }
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".json",
+        delete=False,
+        encoding="utf-8",
+    ) as file:
+        json.dump(dcr_definition, file, indent=2)
+        dcr_file_path = file.name
+
+    create_dcr_cmd = [
+        "az", "monitor", "data-collection", "rule", "create",
+        "--name", dcr_name,
+        "--resource-group", rg_name,
+        "--location", location,
+        "--rule-file", dcr_file_path,
+        "--query", "id",
+        "--output", "tsv",
+    ]
+
+    try:
+        dcr_id = run_command(create_dcr_cmd).strip()
+    finally:
+        Path(dcr_file_path).unlink(missing_ok=True)
+
+    return dcr_id
+        
+def create_azure_dashboard():
+
     pass
 
 
 # 1. Authenticate the script
-# 
-# 2. Deploy container app to Azure Web App
-# 3. Provision monitoring resources
+# 2. Provision monitoring resources
+# 3. Deploy VM app and container app to Azure Web App
 def start_deployment():
-    rg_name = input(f"Resource group [{RG_P1}]: ") or RG_P1
-    rg_shared_name = input(f"Resource group [{RG_SHARED}]: ") or RG_SHARED
-    location = input(f"Location [{LOCATION}]: ") or LOCATION
-    vm_name = input(f"VM name [p1-auth-vm]: ") or "p1-auth-vm"
-    acr_name = input(f"ACR name [{ACR_NAME}]: ") or ACR_NAME
-    app_service_plan_name = (
-        input("App Service Plan [p1-app-service-plan]: ")
-        or "p1-app-service-plan"
-    )
-    app_vnet_name = input("VNet name [p1-vnet]: ") or "p1-vnet" 
-    web_app_name = input("Web App name [p1-web-app-test]: ") or "p1-web-app-test"
-    image_name = input("Image name [p1-image]: ") or "p1-image"
-    image_tag = input("Image tag [latest]: ") or "latest"
+    name_suffix = "sqj"
 
+    rg_name = f"p1-rg-{name_suffix}"
+    rg_shared_name = f"p1-rg-shared-{name_suffix}"
+    location = LOCATION
+    vm_name = f"p1-auth-vm-{name_suffix}"
+    acr_name = f"p1acr{name_suffix}"
+    app_service_plan_name = f"p1-app-service-plan-{name_suffix}"
+    app_vnet_name = f"p1-vnet-{name_suffix}"
+    web_app_name = f"p1-web-app-{name_suffix}"
+    image_name = "p1-image"
+    image_tag = "latest"
+    dcr_name = f"p1-vm-telemetry-dcr-{name_suffix}"
+    app_insights_name = f"p1-app-insights-{name_suffix}"
+    law_name = f"p1-log-analytics-{name_suffix}"
 
+    # rg_name = f"p1-rg-test-{name_suffix}"
+    # rg_shared_name = f"shared-rg-{name_suffix}"
+    # vm_name = f"p1-auth-vm-{name_suffix}"
+    # acr_name = f"p1acr{name_suffix}"
+    # app_service_plan_name = f"p1-app-service-plan-{name_suffix}"
+    # app_vnet_name = f"p1-vnet-{name_suffix}"
+    # web_app_name = f"p1-web-app-test-{name_suffix}"
+    # image_name = "p1-image"
+    # image_tag = "latest"
+    # dcr_name = f"p1-vm-telemetry-dcr-{name_suffix}"
+    # app_insights_name = f"p1-app-insights-{name_suffix}"
     # =========================================
 
     # 1.
     # For simplicity, authenticate manually with "az login" 
     # authenticate()
 
-    # 2.
+    create_resource_group(rg_name)
+    create_resource_group(rg_shared_name)
+    create_vnet_if_not_exists(rg_name, app_vnet_name, location, "10.0.0.0/16")
+
+
+    # 2. 
     # create_resource_group()
-    # create_vnet()
-    # create nsg rules for the vnet
-    # create and deploy authentication app to vm
+    # create_log_analytics_workspace()
+    # create_application_insights(), 
+        # for app telemetry, utilize SDK in code  
+        # for connection string injection, enable in web app settings
+    # configure_diagnostics_settings() (for platform logs)
+    # create_dashboard()
+
+    law_id = create_log_analytics_workspace(
+        rg_name=rg_name,
+        workspace_name=law_name,
+        location=location,
+    )
+
+    app_insights_conn_string = create_app_insights(
+        app_insights_name,
+        location,
+        rg_name,
+        law_name
+    )
+
+    dcr_id = create_dcr(location, law_id, dcr_name, rg_name)
     
-    create_resource_group(RG_P1)
-    create_resource_group(RG_SHARED)
+    # 3.
+    # deploy web app
+    # create and deploy authentication app to vm
 
-    create_vnet_if_not_exists(RG_P1, app_vnet_name, LOCATION, "10.0.0.0/16")
-    create_vm_if_not_exists(rg_name, vm_name, app_vnet_name, LOCATION) 
-    deploy_app_to_vm_via_bootstrap_script(rg_name, vm_name, SSH_KEY_PATH, BOOTSTRAP_SCRIPT)   
-
-    deploy_container_to_azure_web_app(
-        rg_name=RG_P1,
+    web_app_endpoint = deploy_container_to_azure_web_app(
+        rg_name=rg_name,
+        rg_shared_name=rg_shared_name,
         acr_name=acr_name,
-        location=APP_SERVICE_LOCATION,
+        location=location,
         app_service_plan_name=app_service_plan_name,
         web_app_name=web_app_name,
         appservice_sku=APP_SERVICE_SKU,
@@ -677,6 +801,29 @@ def start_deployment():
         container_port=8081,
         acr_sku=ACR_SKU
     )
+    webapp_id_cmd = [
+        "az", "webapp", "show", 
+        "--resource-group", rg_name,
+        "--name", web_app_name,
+        "--query", "id",
+        "--output", "tsv"
+    ]
+    web_app_id = run_command(webapp_id_cmd).strip()
+    create_diagnostic_setting_cmd = [
+        "az", "monitor", "diagnostic-settings", "create",
+        "--name", "WebAppDiagnostics",
+        "--resource", web_app_id,
+        "--workspace", law_id,
+        "--logs",
+            (
+                '[{"category":"AppServiceConsoleLogs","enabled":true},'
+                '{"category":"AppServiceHTTPLogs","enabled":true},'
+                '{"category":"AppServiceAppLogs","enabled":true},'
+                '{"category":"AppServiceAuditLogs","enabled":true}]'
+            ),
+        "--metrics", '[{"category":"AllMetrics","enabled":true}]',
+    ]
+    run_command(create_diagnostic_setting_cmd)
 
     create_private_endpoint_for_web_app(
         rg_name=rg_name,
@@ -686,19 +833,28 @@ def start_deployment():
         web_app_name=web_app_name
     )
 
-    # 3. 
-    create_log_analytics_workspace(
-        rg_name=rg_name,
-        workspace_name=LOG_ANALYTICS_WORKSPACE_NAME,
-        location=location,
-    )
-    # create_resource_group()
-    # create_log_analytics_workspace()
-    # create_application_insights(), 
-        # for app telemetry, utilize SDK in code  
-        # for connection string injection, enable in web app settings
-    # configure_diagnostics_settings() (for platform logs)
-    # create_azure_managed_grafana()
+
+    vm_id = create_vm_if_not_exists(rg_name, vm_name, app_vnet_name, LOCATION)
+
+    create_dcr_association_cmd = [
+        "az", "monitor", "data-collection", "rule", "association", "create",
+        "--name", "p1-auth-vm-association",
+        "--rule-id", "/subscriptions/625d2835-e70b-4872-bebb-29a231edd2ec/resourceGroups/p1-rg-sqj/providers/Microsoft.Insights/dataCollectionRules/p1-vm-telemetry-dcr-sqj",
+        "--resource", vm_id,
+    ]
+    run_command(create_dcr_association_cmd)
+    install_ama_on_vm_cmd = [
+        "az", "vm", "extension", "set",
+        "--resource-group", rg_name,
+        "--vm-name", vm_name,
+        "--name", "AzureMonitorLinuxAgent",
+        "--publisher", "Microsoft.Azure.Monitor",
+        "--enable-auto-upgrade", "true"
+    ]
+    run_command(install_ama_on_vm_cmd)
+
+    deploy_app_to_vm_via_bootstrap_script(rg_name, vm_name, SSH_KEY_PATH, BOOTSTRAP_SCRIPT)   
+
 
 if __name__ == '__main__':
     start_deployment()
