@@ -4,3 +4,4 @@ pydantic==2.7.4
 psycopg2-binary==2.9.9
 pyjwt[crypto]==2.8.0
 azure-monitor-opentelemetry==1.8.9
+opentelemetry-api
