@@ -755,83 +755,83 @@ def start_deployment():
     # For simplicity, authenticate manually with "az login" 
     # authenticate()
 
-    # create_resource_group(rg_name)
-    # create_resource_group(rg_shared_name)
-    # create_vnet_if_not_exists(rg_name, app_vnet_name, location, "10.0.0.0/16")
+    create_resource_group(rg_name)
+    create_resource_group(rg_shared_name)
+    create_vnet_if_not_exists(rg_name, app_vnet_name, location, "10.0.0.0/16")
 
 
-    # # 2. 
-    # # create_resource_group()
-    # # create_log_analytics_workspace()
-    # # create_application_insights(), 
-    #     # for app telemetry, utilize SDK in code  
-    #     # for connection string injection, enable in web app settings
-    # # configure_diagnostics_settings() (for platform logs)
-    # # create_dashboard()
+    # 2. 
+    # create_resource_group()
+    # create_log_analytics_workspace()
+    # create_application_insights(), 
+        # for app telemetry, utilize SDK in code  
+        # for connection string injection, enable in web app settings
+    # configure_diagnostics_settings() (for platform logs)
+    # create_dashboard()
 
-    # law_id = create_log_analytics_workspace(
-    #     rg_name=rg_name,
-    #     workspace_name=law_name,
-    #     location=location,
-    # )
+    law_id = create_log_analytics_workspace(
+        rg_name=rg_name,
+        workspace_name=law_name,
+        location=location,
+    )
 
-    # app_insights_conn_string = create_app_insights(
-    #     app_insights_name,
-    #     location,
-    #     rg_name,
-    #     law_name
-    # )
+    app_insights_conn_string = create_app_insights(
+        app_insights_name,
+        location,
+        rg_name,
+        law_name
+    )
 
-    # dcr_id = create_dcr(location, law_id, dcr_name, rg_name)
+    dcr_id = create_dcr(location, law_id, dcr_name, rg_name)
     
-    # # 3.
-    # # deploy web app
-    # # create and deploy authentication app to vm
+    # 3.
+    # deploy web app
+    # create and deploy authentication app to vm
 
-    # web_app_endpoint = deploy_container_to_azure_web_app(
-    #     rg_name=rg_name,
-    #     rg_shared_name=rg_shared_name,
-    #     acr_name=acr_name,
-    #     location=location,
-    #     app_service_plan_name=app_service_plan_name,
-    #     web_app_name=web_app_name,
-    #     appservice_sku=APP_SERVICE_SKU,
-    #     image_name=image_name,
-    #     image_tag=image_tag,
-    #     container_port=8081,
-    #     acr_sku=ACR_SKU
-    # )
-    # webapp_id_cmd = [
-    #     "az", "webapp", "show", 
-    #     "--resource-group", rg_name,
-    #     "--name", web_app_name,
-    #     "--query", "id",
-    #     "--output", "tsv"
-    # ]
-    # web_app_id = run_command(webapp_id_cmd).strip()
-    # create_diagnostic_setting_cmd = [
-    #     "az", "monitor", "diagnostic-settings", "create",
-    #     "--name", "WebAppDiagnostics",
-    #     "--resource", web_app_id,
-    #     "--workspace", law_id,
-    #     "--logs",
-    #         (
-    #             '[{"category":"AppServiceConsoleLogs","enabled":true},'
-    #             '{"category":"AppServiceHTTPLogs","enabled":true},'
-    #             '{"category":"AppServiceAppLogs","enabled":true},'
-    #             '{"category":"AppServiceAuditLogs","enabled":true}]'
-    #         ),
-    #     "--metrics", '[{"category":"AllMetrics","enabled":true}]',
-    # ]
-    # run_command(create_diagnostic_setting_cmd)
+    web_app_endpoint = deploy_container_to_azure_web_app(
+        rg_name=rg_name,
+        rg_shared_name=rg_shared_name,
+        acr_name=acr_name,
+        location=location,
+        app_service_plan_name=app_service_plan_name,
+        web_app_name=web_app_name,
+        appservice_sku=APP_SERVICE_SKU,
+        image_name=image_name,
+        image_tag=image_tag,
+        container_port=8081,
+        acr_sku=ACR_SKU
+    )
+    webapp_id_cmd = [
+        "az", "webapp", "show", 
+        "--resource-group", rg_name,
+        "--name", web_app_name,
+        "--query", "id",
+        "--output", "tsv"
+    ]
+    web_app_id = run_command(webapp_id_cmd).strip()
+    create_diagnostic_setting_cmd = [
+        "az", "monitor", "diagnostic-settings", "create",
+        "--name", "WebAppDiagnostics",
+        "--resource", web_app_id,
+        "--workspace", law_id,
+        "--logs",
+            (
+                '[{"category":"AppServiceConsoleLogs","enabled":true},'
+                '{"category":"AppServiceHTTPLogs","enabled":true},'
+                '{"category":"AppServiceAppLogs","enabled":true},'
+                '{"category":"AppServiceAuditLogs","enabled":true}]'
+            ),
+        "--metrics", '[{"category":"AllMetrics","enabled":true}]',
+    ]
+    run_command(create_diagnostic_setting_cmd)
 
-    # create_private_endpoint_for_web_app(
-    #     rg_name=rg_name,
-    #     rg_shared_name=rg_shared_name,
-    #     location=location,
-    #     vnet_name=app_vnet_name,
-    #     web_app_name=web_app_name
-    # )
+    create_private_endpoint_for_web_app(
+        rg_name=rg_name,
+        rg_shared_name=rg_shared_name,
+        location=location,
+        vnet_name=app_vnet_name,
+        web_app_name=web_app_name
+    )
 
 
     vm_id = create_vm_if_not_exists(rg_name, vm_name, app_vnet_name, LOCATION)

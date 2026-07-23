@@ -22,10 +22,12 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - DB_HOST=db
-      - DB_NAME=metrics_db
-      - DB_USER=admin_user
-      - DB_PASSWORD=network_password
+      APPLICATIONINSIGHTS_CONNECTION_STRING: InstrumentationKey=1411f532-a6d4-4e86-9400-c98388f6bddd;IngestionEndpoint=https://canadaeast-0.in.applicationinsights.azure.com/;LiveEndpoint=https://canadaeast.livediagnostics.monitor.azure.com/;ApplicationId=f421a0d1-11cc-40a3-a029-759c8d1d1b98
+      ACCOUNT_SERVICE_URL: http://p1-web-app-test.azurewebsites.net
+      DB_HOST: db
+      DB_NAME: metrics_db
+      DB_USER: admin_user
+      DB_PASSWORD: network_password
     depends_on:
       db:
         condition: service_healthy
