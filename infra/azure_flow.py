@@ -18,7 +18,7 @@ APP_SERVICE_SKU = 'B1'
 APP_SERVICE_LOCATION = "centralus"
 APP_SERVICE_PRIVATE_DNS_ZONE = "privatelink.azurewebsites.net"
 
-LOCATION = 'canadaeast'
+LOCATION = 'centralus'
 
 ACR_SKU = 'Basic'
 
@@ -749,11 +749,12 @@ def create_azure_dashboard(subscription_id, rg_name, location, law_id, app_insig
 # 2. Provision monitoring resources
 # 3. Deploy VM app and container app to Azure Web App
 def start_deployment():
-    name_suffix = "sqj"
+    location = LOCATION
+
+    name_suffix = location
 
     rg_name = f"p1-rg-{name_suffix}"
     rg_shared_name = f"p1-rg-shared-{name_suffix}"
-    location = LOCATION
     vm_name = f"p1-auth-vm-{name_suffix}"
     acr_name = f"p1acr{name_suffix}"
     app_service_plan_name = f"p1-app-service-plan-{name_suffix}"
@@ -932,6 +933,22 @@ def start_deployment():
     print("=================================")
     create_azure_dashboard(subscription_id, rg_name, location, law_id, app_insights_id, workbook_name)
 
+
+    print("=================================")
+    print("PROVISIONED AZURE RESOURCES")
+    print("=================================")
+    get_vm_public_ip_cmd = [
+        "az", "vm", "list-ip-addresses",
+        "-g", rg_name,
+        "-n", vm_name,
+        "--query", "[0].virtualMachine.network.publicIpAddresses[0].ipAddress",
+        "-o", "tsv"
+    ]
+    vm_public_ip = run_command(get_vm_public_ip_cmd).strip().replace("\r", "")
+
+    print(f"VM App Endpoint (Auth Service): http://{vm_public_ip}:8081/docs")
+    print(f"Azure Web App Endpoint (Account Service): http://{web_app_endpoint}")
+    
 
 if __name__ == '__main__':
     start_deployment()
