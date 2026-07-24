@@ -1,0 +1,703 @@
+{
+  "version": "Notebook/1.0",
+  "name": "__WORKBOOK_DISPLAY_NAME__",
+  "items": [
+    {
+      "type": 9,
+      "name": "parameters - 0",
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time Range",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ],
+              "allowCustom": false
+            },
+            "id": "801727ad-e8de-4dc0-a178-57997d80a6ae",
+            "key": "801727ad-e8de-4dc0-a178-57997d80a6ae"
+          },
+          {
+            "id": "ee13ac01-0ed3-48b2-ae35-e523e76e5900",
+            "version": "KqlParameterItem/1.0",
+            "name": "PLACEHOLDER",
+            "type": 1,
+            "isRequired": false,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "timeContextFromParameter": null,
+            "key": "ee13ac01-0ed3-48b2-ae35-e523e76e5900"
+          },
+          {
+            "id": "d975e19a-bd95-4362-aaf5-2dc14ac2dc75",
+            "version": "KqlParameterItem/1.0",
+            "name": "user_login_avail_slo",
+            "label": "User Login Avail SLO",
+            "type": 1,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "timeContextFromParameter": null,
+            "key": "d975e19a-bd95-4362-aaf5-2dc14ac2dc75",
+            "value": "99.9"
+          },
+          {
+            "id": "74bcbe32-2baf-4db2-9dfc-ae521870262f",
+            "version": "KqlParameterItem/1.0",
+            "name": "user_login_latency_slo",
+            "label": "User Login Latency SLO",
+            "type": 1,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "timeContextFromParameter": null,
+            "key": "74bcbe32-2baf-4db2-9dfc-ae521870262f",
+            "value": "500"
+          },
+          {
+            "id": "94cd7b79-1749-4a3a-ad5f-4c944a184d78",
+            "version": "KqlParameterItem/1.0",
+            "name": "user_register_avail_slo",
+            "label": "User Register Avail SLO",
+            "type": 1,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "timeContextFromParameter": null,
+            "key": "94cd7b79-1749-4a3a-ad5f-4c944a184d78",
+            "value": "99.9"
+          },
+          {
+            "id": "a01864e4-1737-42f0-8101-dbe45809e22c",
+            "version": "KqlParameterItem/1.0",
+            "name": "user_register_latency_slo",
+            "label": "User Register Latency SLO",
+            "type": 1,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "timeContextFromParameter": null,
+            "key": "a01864e4-1737-42f0-8101-dbe45809e22c",
+            "value": "500"
+          },
+          {
+            "id": "e3926683-88b3-4320-b03f-1b071d10d436",
+            "version": "KqlParameterItem/1.0",
+            "name": "check_balance_avail_slo",
+            "label": "Check Balance Avail SLO",
+            "type": 1,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "timeContextFromParameter": null,
+            "key": "e3926683-88b3-4320-b03f-1b071d10d436",
+            "value": "99.95"
+          },
+          {
+            "id": "e0302c6c-9add-4ff0-b0ef-2fe8260e27d9",
+            "version": "KqlParameterItem/1.0",
+            "name": "check_balance_latency_slo",
+            "label": "Check Balance Latency SLO",
+            "type": 1,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "timeContextFromParameter": null,
+            "key": "e0302c6c-9add-4ff0-b0ef-2fe8260e27d9",
+            "value": "300"
+          },
+          {
+            "id": "62c14e89-f503-4158-9b39-2c7b4c0b2745",
+            "version": "KqlParameterItem/1.0",
+            "name": "BaselineTrafficTimeRange",
+            "label": "Baseline Traffic Time Range",
+            "type": 4,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ]
+            },
+            "timeContextFromParameter": null,
+            "key": "62c14e89-f503-4158-9b39-2c7b4c0b2745",
+            "value": {
+              "durationMs": 2592000000
+            }
+          },
+          {
+            "id": "a49319fd-714a-4d36-8259-7fd62651e5fb",
+            "version": "KqlParameterItem/1.0",
+            "name": "CurrentTrafficTimeRange",
+            "label": "Current Traffic Time Range",
+            "type": 4,
+            "isRequired": true,
+            "multiSelect": false,
+            "isHiddenWhenLocked": false,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ]
+            },
+            "timeContextFromParameter": null,
+            "key": "a49319fd-714a-4d36-8259-7fd62651e5fb",
+            "value": {
+              "durationMs": 3600000
+            }
+          }
+        ]
+      },
+      "styleSettings": {
+        "w": 14,
+        "h": 6,
+        "x": 0,
+        "y": 0,
+        "showBorder": false,
+        "borderStyle": "light thick"
+      }
+    },
+    {
+      "type": 3,
+      "name": "logs query - 1",
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "SLI vs SLO ({BaselineTrafficTimeRange})",
+        "query": "let JourneySLOs =\n    union\n    (\n        print\n            Journey = \"user-login\",\n            AvailabilitySLO =\n                todouble('{user_login_avail_slo}') / 100.0,\n            LatencySLOMs =\n                todouble('{user_login_latency_slo}')\n    ),\n    (\n        print\n            Journey = \"user-register\",\n            AvailabilitySLO =\n                todouble('{user_register_avail_slo}') / 100.0,\n            LatencySLOMs =\n                todouble('{user_register_latency_slo}')\n    ),\n    (\n        print\n            Journey = \"check-balance\",\n            AvailabilitySLO =\n                todouble('{check_balance_avail_slo}') / 100.0,\n            LatencySLOMs =\n                todouble('{check_balance_latency_slo}')\n    );\n\n// Calculate the exact lengths of the traffic windows.\n// The minimum protects against a custom zero-length range.\nlet BaselineWindowHours =\n    max_of(\n        1.0 / 3600.0,\n        todouble(\n            datetime_diff(\n                \"second\",\n                todatetime('{BaselineTrafficTimeRange:end}'),\n                todatetime('{BaselineTrafficTimeRange:start}')\n            )\n        ) / 3600.0\n    );\n\nlet CurrentWindowHours =\n    max_of(\n        1.0 / 3600.0,\n        todouble(\n            datetime_diff(\n                \"second\",\n                todatetime('{CurrentTrafficTimeRange:end}'),\n                todatetime('{CurrentTrafficTimeRange:start}')\n            )\n        ) / 3600.0\n    );\n\n// SLO metrics for the selected evaluation period.\nlet RequestMetrics =\n    AppRequests\n    | where TimeGenerated {TimeRange}\n    | extend Journey = tostring(Properties[\"app.journey\"])\n    | where isnotempty(Journey)\n    | summarize\n        Volume = sum(ItemCount),\n        SuccessfulRequests = sumif(ItemCount, Success == true),\n        P95LatencyMs = percentilew(DurationMs, ItemCount, 95)\n      by Journey\n    | extend\n        Availability =\n            todouble(SuccessfulRequests) / todouble(Volume);\n\n// Historical average hourly traffic over the baseline window.\nlet BaselineTraffic =\n    AppRequests\n    | where TimeGenerated {BaselineTrafficTimeRange}\n    | extend Journey = tostring(Properties[\"app.journey\"])\n    | where isnotempty(Journey)\n    | summarize\n        BaselineVolume = sum(ItemCount)\n      by Journey\n    | extend\n        BaselineRequestsPerHour =\n            todouble(BaselineVolume) / BaselineWindowHours;\n\n// Recent hourly traffic over the current traffic window.\nlet CurrentTraffic =\n    AppRequests\n    | where TimeGenerated {CurrentTrafficTimeRange}\n    | extend Journey = tostring(Properties[\"app.journey\"])\n    | where isnotempty(Journey)\n    | summarize\n        CurrentTrafficVolume = sum(ItemCount)\n      by Journey\n    | extend\n        CurrentRequestsPerHour =\n            todouble(CurrentTrafficVolume) / CurrentWindowHours;\n\nJourneySLOs\n| join kind=leftouter RequestMetrics on Journey\n| join kind=leftouter BaselineTraffic on Journey\n| join kind=leftouter CurrentTraffic on Journey\n\n| extend\n    Volume = coalesce(Volume, 0),\n    BaselineVolume = coalesce(BaselineVolume, 0),\n    CurrentTrafficVolume = coalesce(CurrentTrafficVolume, 0),\n    BaselineRequestsPerHour =\n        coalesce(BaselineRequestsPerHour, 0.0),\n    CurrentRequestsPerHour =\n        coalesce(CurrentRequestsPerHour, 0.0),\n    Availability = iff(\n        Volume == 0,\n        real(null),\n        Availability\n    )\n\n// Availability/error-budget calculation.\n| extend\n    AllowedFailureRate = 1.0 - AvailabilitySLO,\n    ActualFailureRate = iff(\n        Volume == 0,\n        real(null),\n        1.0 - Availability\n    )\n\n// Burn rate:\n// 1.0 = consuming the entire allowed budget at the permitted rate.\n// <1.0 = within the budget.\n// >1.0 = exceeding the allowed failure rate.\n| extend\n    BurnRate = case(\n        Volume == 0,\n        real(null),\n\n        AllowedFailureRate == 0.0\n            and ActualFailureRate <= 0.0,\n        0.0,\n\n        AllowedFailureRate == 0.0,\n        real(null),\n\n        ActualFailureRate / AllowedFailureRate\n    )\n\n// Error-budget remaining:\n// 1.0 = 100% remains.\n// 0.0 = fully consumed.\n// Negative = exceeded.\n| extend\n    AvailabilityBudgetRemaining = case(\n        isnull(BurnRate),\n        real(null),\n\n        1.0 - BurnRate\n    )\n\n// Latency headroom in percentage.\n// Positive = below limit.\n// Zero = exactly at limit.\n// Negative = above limit.\n| extend\n    LatencyHeadroomRatio = case(\n        Volume == 0\n            or isnull(P95LatencyMs),\n        real(null),\n\n        LatencySLOMs <= 0.0,\n        real(null),\n\n        (LatencySLOMs - P95LatencyMs)\n            / LatencySLOMs\n    )\n\n\n// Current traffic relative to the historical baseline.\n// 1.20 means current traffic is 20% above baseline.\n| extend\n    TrafficRatio = case(\n        BaselineRequestsPerHour <= 0.0,\n        real(null),\n\n        CurrentRequestsPerHour / BaselineRequestsPerHour\n    )\n\n| extend\n    TrafficChange = case(\n        isnull(TrafficRatio),\n        real(null),\n\n        TrafficRatio - 1.0\n    )\n\n// 2 = healthy, 1 = warning, 0 = breached, -1 = no data.\n| extend\n    AvailabilityStatus = case(\n        Volume == 0, -1,\n        BurnRate > 1.0, 0,\n        BurnRate >= 0.50, 1,\n        2\n    )\n\n| extend\n    LatencyStatus = case(\n        Volume == 0 or isnull(P95LatencyMs), -1,\n        LatencyHeadroomRatio < 0.0, 0,\n        LatencyHeadroomRatio <= 0.20, 1,\n        2\n    )\n\n| project\n    Journey,\n\n    Availability = round(Availability, 2),\n    ['Error Budget Remaining (%)'] =\n        round(AvailabilityBudgetRemaining, 2),\n\n    ['P95 Latency (ms)'] =\n        round(P95LatencyMs, 0),\n    ['Latency Headroom (ms)'] =\n        round(LatencyHeadroomRatio, 1),\n\n    ['SLO Window Volume'] =\n        Volume,\n    ['Current Requests/hr'] =\n        round(CurrentRequestsPerHour, 1),\n    ['Baseline Requests/hr'] =\n        round(BaselineRequestsPerHour, 1),\n    ['Traffic Change (%)'] =\n        round(TrafficChange, 2),\n\n    Correctness = \"N/A\",\n    AvailabilityStatus,\n    LatencyStatus\n\n| order by Journey asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+        ],
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Availability$",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": ">",
+                    "sourceColumn": "AvailabilityStatus",
+                    "thresholdValue": "1",
+                    "representation": "dot-green"
+                  },
+                  {
+                    "operator": ">",
+                    "sourceColumn": "AvailabilityStatus",
+                    "thresholdValue": "0",
+                    "representation": "dot-yellow"
+                  },
+                  {
+                    "operator": ">",
+                    "sourceColumn": "AvailabilityStatus",
+                    "thresholdValue": "-1",
+                    "representation": "dot-redBright"
+                  },
+                  {
+                    "operator": "Default",
+                    "representation": ""
+                  }
+                ]
+              },
+              "numberFormat": {
+                "unit": 0,
+                "options": {
+                  "style": "percent",
+                  "useGrouping": false,
+                  "minimumIntegerDigits": 1,
+                  "minimumFractionDigits": 0
+                }
+              }
+            },
+            {
+              "columnMatch": "P95 Latency",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": ">",
+                    "sourceColumn": "LatencyStatus",
+                    "thresholdValue": "1",
+                    "representation": "dot-green"
+                  },
+                  {
+                    "operator": ">",
+                    "sourceColumn": "LatencyStatus",
+                    "thresholdValue": "0",
+                    "representation": "dot-yellow"
+                  },
+                  {
+                    "operator": ">",
+                    "sourceColumn": "LatencyStatus",
+                    "thresholdValue": "-1",
+                    "representation": "dot-redBright"
+                  },
+                  {
+                    "operator": "Default",
+                    "representation": ""
+                  }
+                ]
+              }
+            },
+            {
+              "columnMatch": "AvailabilityStatus",
+              "formatter": 0,
+              "formatOptions": {}
+            },
+            {
+              "columnMatch": "Journey",
+              "formatter": 1,
+              "formatOptions": {
+                "linkTarget": "OpenBlade",
+                "linkIsContextBlade": false,
+                "bladeOpenContext": {
+                  "extensionName": "AppInsightsExtension",
+                  "bladeName": "UsageNotebookBlade",
+                  "bladeParameters": [
+                    {
+                      "name": "ComponentId",
+                      "source": "static",
+                      "value": "__APPLICATION_INSIGHTS_RESOURCE_ID__"
+                    },
+                    {
+                      "name": "ConfigurationId",
+                      "source": "static",
+                      "value": "__WORKBOOK_RESOURCE_ID__"
+                    },
+                    {
+                      "name": "Type",
+                      "source": "static",
+                      "value": "workbook"
+                    },
+                    {
+                      "name": "WorkbookTemplateName",
+                      "source": "static",
+                      "value": "Historical Trends"
+                    },
+                    {
+                      "name": "ViewerMode",
+                      "source": "static",
+                      "value": "true"
+                    },
+                    {
+                      "name": "Location",
+                      "source": "static",
+                      "value": "eastus"
+                    }
+                  ],
+                  "bladeJsonParameters": null
+                }
+              }
+            },
+            {
+              "columnMatch": "Latency Headroom (ms)",
+              "formatter": 0,
+              "numberFormat": {
+                "options": {
+                  "style": "percent",
+                  "minimumFractionDigits": 0,
+                  "minimumSignificantDigits": 1
+                }
+              }
+            },
+            {
+              "numberFormat": {
+                "options": {
+                  "style": "percent",
+                  "minimumSignificantDigits": 1
+                }
+              },
+              "columnMatch": "Avail. Error Budget",
+              "formatter": 0
+            },
+            {
+              "numberFormat": {
+                "options": {
+                  "style": "percent",
+                  "minimumSignificantDigits": 1
+                }
+              },
+              "columnMatch": "Latency Headroom (%)",
+              "formatter": 0
+            },
+            {
+              "numberFormat": {
+                "options": {
+                  "style": "percent",
+                  "minimumSignificantDigits": 1
+                }
+              },
+              "columnMatch": "Traffic Change (%)",
+              "formatter": 0
+            },
+            {
+              "numberFormat": {
+                "options": {
+                  "style": "percent",
+                  "minimumSignificantDigits": 1
+                }
+              },
+              "columnMatch": "Error Budget Remaining (%)",
+              "formatter": 0
+            }
+          ],
+          "labelSettings": [
+            {
+              "columnId": "AvailabilityStatus",
+              "label": "Status_Avail"
+            },
+            {
+              "columnId": "LatencyStatus",
+              "label": "Status_Latency"
+            }
+          ],
+          "sortBy": [
+            {
+              "itemKey": "Avail. Budget",
+              "sortOrder": 2
+            }
+          ]
+        }
+      },
+      "styleSettings": {
+        "showBorder": true,
+        "borderStyle": "light thick",
+        "w": 24,
+        "h": 6,
+        "x": 0,
+        "y": 6
+      }
+    },
+    {
+      "type": 11,
+      "name": "Application Map",
+      "content": {
+        "version": "LinkItem/1.0",
+        "links": [
+          {
+            "id": "d00fb3c6-6d2b-4565-8c47-5e11bb280625",
+            "key": "d00fb3c6-6d2b-4565-8c47-5e11bb280625",
+            "linkTarget": "OpenBlade",
+            "linkLabel": "Application Map",
+            "subTarget": "",
+            "preText": "",
+            "postText": "",
+            "style": "primary",
+            "linkIsContextBlade": true,
+            "bladeOpenContext": {
+              "extensionName": "AppInsightsExtension",
+              "bladeName": "BladeRedirect",
+              "bladeJsonParameters": "{\n  \"BladeName\": \"applicationMap\",\n  \"ResourceId\": \"/subscriptions/625d2835-e70b-4872-bebb-29a231edd2ec/resourceGroups/p1-rg-test/providers/microsoft.insights/components/p1-app-insights\",\n  \"BladeInputs\": {\n    \"MainResourceId\": \"/subscriptions/625d2835-e70b-4872-bebb-29a231edd2ec/resourceGroups/p1-rg-test/providers/microsoft.insights/components/p1-app-insights\",\n    \"TimeContext\": {\n      \"durationMs\": 86400000,\n      \"createdTime\": \"2026-07-22T04:37:55.000Z\",\n      \"isInitialTime\": false,\n      \"grain\": 1,\n      \"useDashboardTimeRange\": false\n    },\n    \"DataModel\": {\n      \"exclude4xxError\": true,\n      \"timeContext\": {\n        \"durationMs\": 86400000,\n        \"createdTime\": \"2026-07-22T04:37:55.000Z\",\n        \"isInitialTime\": false,\n        \"grain\": 1,\n        \"useDashboardTimeRange\": false\n      },\n      \"layoutOption\": \"Organic\",\n      \"nodeContentFilter\": \"\",\n      \"components\": []\n    }\n  }\n}",
+              "bladeParameters": null
+            }
+          }
+        ],
+        "style": "nav",
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "resourceIds": [
+          "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+        ]
+      },
+      "styleSettings": {
+        "showBorder": true,
+        "borderStyle": "light thick",
+        "w": 24,
+        "h": 2,
+        "x": 0,
+        "y": 12
+      }
+    },
+    {
+      "type": 3,
+      "name": "Service Health {TimeRange}",
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "Service Health ({TimeRange})",
+        "query": "let Requests =\n    AppRequests\n    | where TimeGenerated {TimeRange}\n    | extend Service = case(\n        isnotempty(AppRoleName), AppRoleName,\n        isnotempty(AppRoleInstance), AppRoleInstance,\n        \"unknown-service\"\n    );\n\nlet Window =\n    Requests\n    | summarize\n        WindowStart = min(TimeGenerated),\n        WindowEnd = max(TimeGenerated)\n    | extend WindowMinutes =\n        max_of(datetime_diff(\"second\", WindowEnd, WindowStart) / 60.0, 1.0);\n\nRequests\n| summarize\n    RequestCount = sum(ItemCount),\n    Errors5xx = sumif(\n        ItemCount,\n        tostring(ResultCode) startswith \"5\"\n    ),\n    Errors4xx = sumif(\n        ItemCount,\n        tostring(ResultCode) startswith \"4\"\n    ),\n    P95LatencyMs = percentilew(\n        DurationMs,\n        ItemCount,\n        95\n    )\n    by Service\n| extend JoinKey = 1\n| join kind=inner (\n    Window\n    | extend JoinKey = 1\n) on JoinKey\n| extend\n    ReqPerMin = round(\n        todouble(RequestCount) / WindowMinutes,\n        2\n    ),\n    Rate5xx = round(\n        100.0 * todouble(Errors5xx)\n        / max_of(todouble(RequestCount), 1.0),\n        2\n    ),\n    Rate4xx = round(\n        100.0 * todouble(Errors4xx)\n        / max_of(todouble(RequestCount), 1.0),\n        2\n    )\n| project\n    Service,\n    ReqPerMin,\n    Rate5xx,\n    Rate4xx,\n    P95LatencyMs\n| order by Service asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+        ],
+        "timeContextFromParameter": "TimeRange",
+        "visualization": "table",
+        "gridSettings": {
+          "labelSettings": [
+            {
+              "columnId": "Column1",
+              "label": "Req/Min"
+            },
+            {
+              "columnId": "Column2",
+              "label": "5xx Rate"
+            },
+            {
+              "columnId": "Column3",
+              "label": "4xx Rate"
+            },
+            {
+              "columnId": "Column4",
+              "label": "P95 Latency (ms)"
+            }
+          ]
+        }
+      },
+      "styleSettings": {
+        "showBorder": true,
+        "borderStyle": "light thick",
+        "w": 24,
+        "h": 5,
+        "x": 0,
+        "y": 14
+      }
+    },
+    {
+      "type": 3,
+      "name": "Requests Rate By Service",
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "Requests Rate By Service ({TimeRange})",
+        "query": "AppRequests\n| where TimeGenerated {TimeRange}\n| extend\n    Service = iff(\n        isnotempty(AppRoleName),\n        AppRoleName,\n        \"unknown\"\n    )\n| summarize\n    Requests = sum(ItemCount)\n    by\n        bin(TimeGenerated, 5m),\n        Service\n| extend\n    ReqPerMin = Requests / 5.0\n| project\n    TimeGenerated,\n    Service,\n    ReqPerMin\n| order by TimeGenerated asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+        ],
+        "timeContextFromParameter": "TimeRange",
+        "visualization": "linechart",
+        "aggregation": 3
+      },
+      "styleSettings": {
+        "showBorder": true,
+        "borderStyle": "light thick",
+        "w": 24,
+        "h": 7,
+        "x": 0,
+        "y": 19
+      }
+    },
+    {
+      "type": 3,
+      "name": "5xx Error Rate by Service",
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "5xx Error Rate by Service ({TimeRange})",
+        "query": "AppRequests\n| where TimeGenerated {TimeRange}\n| extend\n    Service = iff(\n        isnotempty(AppRoleName),\n        AppRoleName,\n        \"unknown\"\n    )\n| summarize\n    Total = sum(ItemCount),\n    Errors = sumif(\n        ItemCount,\n        tostring(ResultCode) startswith \"5\"\n    )\n    by\n        bin(TimeGenerated, 5m),\n        Service\n| extend\n    ErrorRate = 100.0 * todouble(Errors) / Total\n| project\n    TimeGenerated,\n    Service,\n    ErrorRate\n| order by TimeGenerated asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+        ],
+        "timeContextFromParameter": "TimeRange",
+        "visualization": "linechart",
+        "aggregation": 2
+      },
+      "styleSettings": {
+        "showBorder": true,
+        "borderStyle": "light thick",
+        "w": 24,
+        "h": 7,
+        "x": 0,
+        "y": 26
+      }
+    },
+    {
+      "type": 3,
+      "name": "4xx Error Rate by Service",
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "4xx Error Rate by Service ({TimeRange})",
+        "query": "AppRequests\n| where TimeGenerated {TimeRange}\n| extend\n    Service = iff(\n        isnotempty(AppRoleName),\n        AppRoleName,\n        \"unknown\"\n    )\n| summarize\n    Total = sum(ItemCount),\n    Errors = sumif(\n        ItemCount,\n        tostring(ResultCode) startswith \"4\"\n    )\n    by\n        bin(TimeGenerated, 5m),\n        Service\n| extend\n    ErrorRate = 100.0 * todouble(Errors) / Total\n| project\n    TimeGenerated,\n    Service,\n    ErrorRate\n| order by TimeGenerated asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+        ],
+        "timeContextFromParameter": "TimeRange",
+        "visualization": "linechart",
+        "aggregation": 2
+      },
+      "styleSettings": {
+        "showBorder": true,
+        "borderStyle": "light thick",
+        "w": 24,
+        "h": 6,
+        "x": 0,
+        "y": 33
+      }
+    },
+    {
+      "type": 3,
+      "name": "P95 Latency by Service",
+      "content": {
+        "version": "KqlItem/1.0",
+        "title": "P95 Latency by Service ({TimeRange})",
+        "query": "AppRequests\n| where TimeGenerated {TimeRange}\n| extend\n    Service = iff(\n        isnotempty(AppRoleName),\n        AppRoleName,\n        \"unknown\"\n    )\n| summarize\n    P95Latency = percentilew(\n        DurationMs,\n        ItemCount,\n        95\n    )\n    by\n        bin(TimeGenerated, 5m),\n        Service\n| project\n    TimeGenerated,\n    Service,\n    P95Latency\n| order by TimeGenerated asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+        ],
+        "timeContextFromParameter": "TimeRange",
+        "visualization": "linechart",
+        "aggregation": 3
+      },
+      "styleSettings": {
+        "showBorder": true,
+        "borderStyle": "light thick",
+        "w": 24,
+        "h": 7,
+        "x": 0,
+        "y": 39
+      }
+    }
+  ],
+  "layout": {
+    "type": "grid"
+  },
+  "styleSettings": {
+    "background": "lighter"
+  },
+  "fallbackResourceIds": [
+    "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

@@ -7,8 +7,11 @@ import os
 import ipaddress
 import json
 import tempfile
+import shlex
+import uuid
 
 from pathlib import Path
+from infra.bootstrap_template import get_vm_bootstrap_script
 from util import run_command
 
 APP_SERVICE_SKU = 'B1'
@@ -17,13 +20,8 @@ APP_SERVICE_PRIVATE_DNS_ZONE = "privatelink.azurewebsites.net"
 
 LOCATION = 'canadaeast'
 
-RG_SHARED = 'p1-rg-shared-test'
-RG_P1 = 'p1-rg-test'
-
-ACR_NAME = 'p1acrtrio'
 ACR_SKU = 'Basic'
 
-LOG_ANALYTICS_WORKSPACE_NAME = "p1-log-analytics"
 LOG_ANALYTICS_SKU = "PerGB2018"
 LOG_ANALYTICS_RETENTION_DAYS = "30"
 
@@ -32,21 +30,16 @@ MANAGED_IDENTITY_ACR_CONFIG = '{"acrUseManagedIdentityCreds": true}'
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))
 )
-VM_ENV_PATH = os.path.join(
-    PROJECT_ROOT, 
-    "app",
-    ".env"
-)
-SSH_KEY_PATH = os.path.expanduser("~/code/keys/project-1-vm-key.pem")
-BOOTSTRAP_SCRIPT = os.path.join(
-    PROJECT_ROOT, 
-    "app", 
-    "bootstrap_vm.sh"
-)
 WEB_APP_DIR = os.path.join(
     PROJECT_ROOT,
     "azure",
     "web-app"
+)
+WORKBOOK_TEMPLATE_PATH = os.path.join(
+    PROJECT_ROOT,
+    "azure",
+    "monitoring",
+    "SLI_SLO_Dashboard.template.workbook"
 )
 
 def authenticate():
@@ -178,44 +171,17 @@ def create_vm_if_not_exists(
 def deploy_app_to_vm_via_bootstrap_script(
         rg_name,
         vm_name,
-        ssh_key_path, 
-        source_bootstrap_path
+        bootstrap_script
     ):
     
-    get_vm_public_ip_cmd = [
-        "az", "vm", "list-ip-addresses",
-        "-g", rg_name,
-        "-n", vm_name,
-        "--query", "[0].virtualMachine.network.publicIpAddresses[0].ipAddress",
-        "-o", "tsv"
+    bootstrap_vm_cmd = [
+        "az", "vm", "run-command", "invoke",
+        "--resource-group", rg_name,
+        "--name", vm_name,
+        "--command-id", "RunShellScript",
+        "--scripts", bootstrap_script
     ]
-    vm_public_ip = run_command(get_vm_public_ip_cmd).strip().replace("\r", "")
-
-    # SCP bootstrap script to remote VM
-    print(f"=== Copying Bootstrap Script to Remote VM ({vm_public_ip}) ===")
-    scp_cmd = [
-        "scp",
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-i", ssh_key_path,
-        source_bootstrap_path,
-        f"azureuser@{vm_public_ip}:~/"
-    ]
-    run_command(scp_cmd)
-
-    # SSH and run the remote bootstrap script to set up Docker, Docker Compose, and deploy the FastAPI application
-    print("=== SSH into VM and Execute Bootstrap Script ===")
-    ssh_cmd = [
-        "ssh",
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-i", ssh_key_path,
-        f"azureuser@{vm_public_ip}",
-        "sudo bash ~/bootstrap_vm.sh"
-    ]
-    run_command(ssh_cmd, print_result=False)
-    print()
-
+    run_command(bootstrap_vm_cmd)
 
 def create_acr_if_not_exists(rg_name, acr_name, sku):
 
@@ -356,7 +322,8 @@ def deploy_container_to_azure_web_app(
         image_name,
         image_tag,
         container_port,
-        acr_sku
+        acr_sku,
+        app_insights_conn_string
     ):
     # Create an ACR
     # Deploy as a quick task
@@ -406,7 +373,9 @@ def deploy_container_to_azure_web_app(
         "az", "webapp", "config", "appsettings", "set",
         "--resource-group", rg_name,
         "--name", web_app_name,
-        "--settings", f"WEBSITES_PORT={container_port}",
+        "--settings", 
+            f"WEBSITES_PORT={container_port}",
+            f"APPLICATIONINSIGHTS_CONNECTION_STRING={app_insights_conn_string}",
         "--output", "none"
     ]
     run_command(port_config_cmd)
@@ -713,9 +682,67 @@ def create_dcr(location, law_id, dcr_name, rg_name):
 
     return dcr_id
         
-def create_azure_dashboard():
+def create_azure_dashboard(subscription_id, rg_name, location, law_id, app_insights_id, workbook_name):
 
-    pass
+    WORKBOOK_GUID=str(uuid.uuid4())
+    workbook_resource_id = (
+        f"/subscriptions/{subscription_id}"
+        f"/resourceGroups/{rg_name}"
+        f"/providers/Microsoft.Insights/workbooks/{WORKBOOK_GUID}"
+    )
+
+    workbook_template = Path(WORKBOOK_TEMPLATE_PATH).read_text(encoding="utf-8")
+    workbook_template = (
+        workbook_template
+        .replace("__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__", law_id)
+        .replace("__APPLICATION_INSIGHTS_RESOURCE_ID__", app_insights_id)
+        .replace("__WORKBOOK_RESOURCE_ID__", workbook_resource_id)
+        .replace("__WORKBOOK_DISPLAY_NAME__", workbook_name)
+    )
+
+    workbook_json = json.loads(workbook_template)
+
+    
+    workbook_properties = {
+        "displayName": workbook_name,
+        "serializedData": json.dumps(
+            workbook_json,
+            separators=(",", ":"),
+        ),
+        "version": workbook_json.get(
+            "version",
+            "Notebook/1.0",
+        ),
+        "sourceId": law_id,
+        "category": "workbook",
+    }
+
+    workbook_resource = {
+        "location": location,
+        "kind": "dashboard",
+        "properties": workbook_properties
+    }
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".json",
+        delete=False,
+        encoding="utf-8",
+    ) as file:
+        json.dump(workbook_resource, file)
+        properties_path = Path(file.name)
+
+    create_workbook_cmd = [
+        "az", "resource", "create",
+        "--resource-group", rg_name,
+        "--resource-type", "Microsoft.Insights/workbooks",
+        "--name", WORKBOOK_GUID,
+        "--location", location,
+        "--is-full-object",
+        "--properties", f"@{properties_path}",
+    ]
+    run_command(create_workbook_cmd)
+
 
 
 # 1. Authenticate the script
@@ -737,6 +764,14 @@ def start_deployment():
     dcr_name = f"p1-vm-telemetry-dcr-{name_suffix}"
     app_insights_name = f"p1-app-insights-{name_suffix}"
     law_name = f"p1-log-analytics-{name_suffix}"
+    workbook_name = f"p1-workbook-{name_suffix}"
+
+    subscription_id_cmd = [
+        "az", "account", "show",
+        "--query", "id", 
+        "--output", "tsv"
+    ]
+    subscription_id = run_command(subscription_id_cmd).strip()
 
     # rg_name = f"p1-rg-test-{name_suffix}"
     # rg_shared_name = f"shared-rg-{name_suffix}"
@@ -782,6 +817,15 @@ def start_deployment():
         law_name
     )
 
+    app_insights_id_cmd = [
+        "az", "monitor", "app-insights", "component", "show",
+        "--app", app_insights_name,
+        "--resource-group", rg_name,
+        "--query", "id",
+        "--output", "tsv"
+    ]
+    app_insights_id = run_command(app_insights_id_cmd).strip()
+
     dcr_id = create_dcr(location, law_id, dcr_name, rg_name)
     
     # 3.
@@ -799,7 +843,8 @@ def start_deployment():
         image_name=image_name,
         image_tag=image_tag,
         container_port=8081,
-        acr_sku=ACR_SKU
+        acr_sku=ACR_SKU,
+        app_insights_conn_string=app_insights_conn_string
     )
     webapp_id_cmd = [
         "az", "webapp", "show", 
@@ -833,13 +878,12 @@ def start_deployment():
         web_app_name=web_app_name
     )
 
-
     vm_id = create_vm_if_not_exists(rg_name, vm_name, app_vnet_name, LOCATION)
 
     create_dcr_association_cmd = [
         "az", "monitor", "data-collection", "rule", "association", "create",
         "--name", "p1-auth-vm-association",
-        "--rule-id", "/subscriptions/625d2835-e70b-4872-bebb-29a231edd2ec/resourceGroups/p1-rg-sqj/providers/Microsoft.Insights/dataCollectionRules/p1-vm-telemetry-dcr-sqj",
+        "--rule-id", dcr_id,
         "--resource", vm_id,
     ]
     run_command(create_dcr_association_cmd)
@@ -853,7 +897,18 @@ def start_deployment():
     ]
     run_command(install_ama_on_vm_cmd)
 
-    deploy_app_to_vm_via_bootstrap_script(rg_name, vm_name, SSH_KEY_PATH, BOOTSTRAP_SCRIPT)   
+    env_vars = {
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": app_insights_conn_string,
+        "ACCOUNT_SERVICE_URL": f"http://{web_app_endpoint}"
+    }
+    env_file_contents = "\n".join(
+        f"{k}={shlex.quote(str(v))}"
+        for k, v in env_vars.items()
+    )
+    bootstrap_script = get_vm_bootstrap_script(env_file_contents)
+    deploy_app_to_vm_via_bootstrap_script(rg_name, vm_name, bootstrap_script)
+
+    create_azure_dashboard(subscription_id, rg_name, location, law_id, app_insights_id, workbook_name)
 
 
 if __name__ == '__main__':

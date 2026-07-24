@@ -255,35 +255,13 @@ async def register(payload: AuthPayload):
             password=payload.password,
         )
 
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                response = await client.post(
-                    f"{ACCOUNT_SERVICE_URL}/accounts",
-                    json={
-                        "account_id": payload.username,
-                    },
-                )
-
-            response.raise_for_status()
-
-        except httpx.HTTPStatusError as exc:
-            logger.error(
-                "Account service rejected account creation: %s",
-                exc.response.text,
-            )
-
-            raise HTTPException(
-                status_code=502,
-                detail="User was created, but account creation failed",
-            )
-
-        except httpx.RequestError:
-            logger.exception("Account service is unavailable")
-
-            raise HTTPException(
-                status_code=503,
-                detail="Account service is unavailable",
-            )
+        await forward_account_request(
+            "POST",
+            "/accounts",
+            {
+                "account_id": payload.username
+            }
+        )
 
         return {
             "status": "success",
