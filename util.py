@@ -2,7 +2,7 @@
 import subprocess
 import sys
 
-def run_command(command_list, display_command=True, print_result=True):
+def run_command(command_list, display_command=True, print_result=False):
     """Utility function to safely execute a command array"""
     if display_command:
         print(f"Executing: {' '.join(command_list)}")

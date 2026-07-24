@@ -3,9 +3,13 @@ from textwrap import dedent
 def get_vm_bootstrap_script(env_block):
     return dedent(f"""\
 #!/usr/bin/env bash
-set -e
+set -euxo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
+
+if command -v cloud-init >/dev/null 2>&1; then
+    cloud-init status --wait
+fi
 
 apt-get update -y
 apt-get install -y docker.io docker-compose-v2 docker-buildx git

@@ -139,8 +139,16 @@ def list_accounts():
     return [
         {
             "account_id": 1,
-            "balance_cents": 1000000,
-            "created_at": "just now"
+            "balance_cents": 1
+        },
+        {
+            "account_id": 2,
+            "balance_cents": 9999999
+        },
+        {
+            "account_id": 3,
+            "balance_cents": 100
+    
         }
     ]
 
@@ -169,7 +177,7 @@ def get_account_balance(account_id: str):
         #     )
 
         return {
-            "account_id": "my account",
+            "account_id": "2",
             "balance_cents": 9999999,
             "balance": 99999.99,
         }

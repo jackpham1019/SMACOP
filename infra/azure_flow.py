@@ -790,6 +790,9 @@ def start_deployment():
     # For simplicity, authenticate manually with "az login" 
     # authenticate()
 
+    print("=================================")
+    print("CREATING RESOURCE GROUPS AND VNET")
+    print("=================================")
     create_resource_group(rg_name)
     create_resource_group(rg_shared_name)
     create_vnet_if_not_exists(rg_name, app_vnet_name, location, "10.0.0.0/16")
@@ -804,6 +807,10 @@ def start_deployment():
     # configure_diagnostics_settings() (for platform logs)
     # create_dashboard()
 
+
+    print("=================================")
+    print("CREATING OBSERVABILITY PLATFORM CORE")
+    print("=================================")
     law_id = create_log_analytics_workspace(
         rg_name=rg_name,
         workspace_name=law_name,
@@ -826,12 +833,14 @@ def start_deployment():
     ]
     app_insights_id = run_command(app_insights_id_cmd).strip()
 
-    dcr_id = create_dcr(location, law_id, dcr_name, rg_name)
     
     # 3.
     # deploy web app
     # create and deploy authentication app to vm
 
+    print("=================================")
+    print("DEPLOYING AZURE WEB APP (ACCOUNT SERVICE)")
+    print("=================================")
     web_app_endpoint = deploy_container_to_azure_web_app(
         rg_name=rg_name,
         rg_shared_name=rg_shared_name,
@@ -870,6 +879,9 @@ def start_deployment():
     ]
     run_command(create_diagnostic_setting_cmd)
 
+    print("=================================")
+    print("CREATING PRIVATE ENDPOINT FOR AZURE WEB APP")
+    print("=================================")
     create_private_endpoint_for_web_app(
         rg_name=rg_name,
         rg_shared_name=rg_shared_name,
@@ -877,6 +889,12 @@ def start_deployment():
         vnet_name=app_vnet_name,
         web_app_name=web_app_name
     )
+
+
+    print("=================================")
+    print("CREATING VM APP (AUTH SERVICE)")
+    print("=================================")
+    dcr_id = create_dcr(location, law_id, dcr_name, rg_name)
 
     vm_id = create_vm_if_not_exists(rg_name, vm_name, app_vnet_name, LOCATION)
 
@@ -887,15 +905,6 @@ def start_deployment():
         "--resource", vm_id,
     ]
     run_command(create_dcr_association_cmd)
-    install_ama_on_vm_cmd = [
-        "az", "vm", "extension", "set",
-        "--resource-group", rg_name,
-        "--vm-name", vm_name,
-        "--name", "AzureMonitorLinuxAgent",
-        "--publisher", "Microsoft.Azure.Monitor",
-        "--enable-auto-upgrade", "true"
-    ]
-    run_command(install_ama_on_vm_cmd)
 
     env_vars = {
         "APPLICATIONINSIGHTS_CONNECTION_STRING": app_insights_conn_string,
@@ -907,7 +916,20 @@ def start_deployment():
     )
     bootstrap_script = get_vm_bootstrap_script(env_file_contents)
     deploy_app_to_vm_via_bootstrap_script(rg_name, vm_name, bootstrap_script)
+    install_ama_on_vm_cmd = [
+        "az", "vm", "extension", "set",
+        "--resource-group", rg_name,
+        "--vm-name", vm_name,
+        "--name", "AzureMonitorLinuxAgent",
+        "--publisher", "Microsoft.Azure.Monitor",
+        "--enable-auto-upgrade", "true"
+    ]
+    run_command(install_ama_on_vm_cmd)
 
+
+    print("=================================")
+    print("CREATING AZURE MONITOR DASHBOARD")
+    print("=================================")
     create_azure_dashboard(subscription_id, rg_name, location, law_id, app_insights_id, workbook_name)
 
 
